@@ -1,0 +1,286 @@
+{
+  "name": "LegalGuard AI - SaaS Contract & Compliance Intelligence Agent",
+  "description": "Autonomous legal contract audit & compliance intelligence agent powered by Supabase Vector (pgvector) and Google Gemini LLM.",
+  "data": {
+    "nodes": [
+      {
+        "id": "Note-1",
+        "type": "noteNode",
+        "position": {
+          "x": 50,
+          "y": 40
+        },
+        "data": {
+          "node": {
+            "template": {
+              "text": {
+                "value": "\ud83d\udccc CAPSTONE PROJECT TRACK 1: LANGFLOW\nProject: LegalGuard AI\nDatabase: Supabase (pgvector)\nLLM: Google Gemini 2.5 Flash\nIdentitas Peserta: [Nama Anda] - [Asal Universitas Anda]"
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "File-1",
+        "type": "genericNode",
+        "position": {
+          "x": 50,
+          "y": 250
+        },
+        "data": {
+          "type": "File",
+          "node": {
+            "template": {
+              "path": {
+                "value": "sample_contract_agreement.pdf"
+              },
+              "silent_errors": {
+                "value": false
+              }
+            },
+            "display_name": "Read Contract File (PDF)",
+            "description": "Loads corporate legal agreements or vendor NDAs in PDF/DOCX format."
+          }
+        }
+      },
+      {
+        "id": "SplitText-1",
+        "type": "genericNode",
+        "position": {
+          "x": 380,
+          "y": 250
+        },
+        "data": {
+          "type": "SplitText",
+          "node": {
+            "template": {
+              "chunk_size": {
+                "value": 800
+              },
+              "chunk_overlap": {
+                "value": 150
+              },
+              "separator": {
+                "value": "\n\n"
+              }
+            },
+            "display_name": "Split Text (Clause Chunking)",
+            "description": "Splits contract text into coherent legal clause chunks."
+          }
+        }
+      },
+      {
+        "id": "GoogleGenerativeAIEmbeddings-1",
+        "type": "genericNode",
+        "position": {
+          "x": 380,
+          "y": 40
+        },
+        "data": {
+          "type": "GoogleGenerativeAIEmbeddings",
+          "node": {
+            "template": {
+              "model_name": {
+                "value": "models/gemini-embedding-001"
+              },
+              "api_key": {
+                "value": ""
+              }
+            },
+            "display_name": "Gemini Generative AI Embeddings",
+            "description": "Generates 768-dimensional dense vector embeddings."
+          }
+        }
+      },
+      {
+        "id": "SupabaseVector-1",
+        "type": "genericNode",
+        "position": {
+          "x": 720,
+          "y": 140
+        },
+        "data": {
+          "type": "Supabase",
+          "node": {
+            "template": {
+              "supabase_url": {
+                "value": "https://your-project.supabase.co"
+              },
+              "supabase_service_key": {
+                "value": ""
+              },
+              "table_name": {
+                "value": "documents"
+              },
+              "query_name": {
+                "value": "match_documents"
+              },
+              "number_of_results": {
+                "value": 5
+              }
+            },
+            "display_name": "Supabase Vector Store (pgvector)",
+            "description": "Stores and retrieves contract clauses using PostgreSQL pgvector."
+          }
+        }
+      },
+      {
+        "id": "ChatInput-1",
+        "type": "genericNode",
+        "position": {
+          "x": 720,
+          "y": 480
+        },
+        "data": {
+          "type": "ChatInput",
+          "node": {
+            "template": {
+              "input_value": {
+                "value": "Audit klausul terminasi dan denda penalti dalam kontrak ini"
+              }
+            },
+            "display_name": "Legal Auditor Chat Input",
+            "description": "Captures user query regarding specific clauses or risk checks."
+          }
+        }
+      },
+      {
+        "id": "ParseData-1",
+        "type": "genericNode",
+        "position": {
+          "x": 1050,
+          "y": 180
+        },
+        "data": {
+          "type": "ParseData",
+          "node": {
+            "template": {
+              "sep": {
+                "value": "\n\n---\n\n"
+              }
+            },
+            "display_name": "Clause Context Parser",
+            "description": "Formats retrieved contract chunks into clean string context."
+          }
+        }
+      },
+      {
+        "id": "PromptTemplate-1",
+        "type": "genericNode",
+        "position": {
+          "x": 1360,
+          "y": 280
+        },
+        "data": {
+          "type": "PromptTemplate",
+          "node": {
+            "template": {
+              "template": {
+                "value": "Anda adalah LegalGuard AI, Senior Corporate Counsel & Compliance Specialist.\nTugas Anda adalah mengaudit klausul kontrak kerja sama bisnis berdasarkan dokumen legal terverifikasi berikut:\n\nKonteks Klausul Dokumen:\n{context}\n\n---\nInstruksi Audit:\n1. Identifikasi pasal/klausul yang relevan dengan pertanyaan pengguna.\n2. Tentukan Risk Severity Level (LOW, MEDIUM, HIGH, atau CRITICAL).\n3. Kutip pasal verbatim dalam tanda kutip.\n4. Analisis potensi implikasi hukum dan kerugian finansial/operasional bagi perusahaan.\n5. Berikan rekomendasi revisi klausul klausul alternatif (Safe Fallback Clause).\n\nPertanyaan User: {question}\n\nBerikan laporan audit terstruktur dengan format Markdown yang rapi."
+              }
+            },
+            "display_name": "Compliance Audit Prompt Template",
+            "description": "Configures role, auditing rubric, and structured response constraints."
+          }
+        }
+      },
+      {
+        "id": "LanguageModel-1",
+        "type": "genericNode",
+        "position": {
+          "x": 1680,
+          "y": 280
+        },
+        "data": {
+          "type": "GoogleGenerativeAIModel",
+          "node": {
+            "template": {
+              "model_name": {
+                "value": "gemini-2.5-flash"
+              },
+              "temperature": {
+                "value": 0.2
+              },
+              "api_key": {
+                "value": ""
+              }
+            },
+            "display_name": "Google Gemini 2.5 Flash",
+            "description": "High-speed reasoning LLM specialized in structured extraction."
+          }
+        }
+      },
+      {
+        "id": "ChatOutput-1",
+        "type": "genericNode",
+        "position": {
+          "x": 1980,
+          "y": 280
+        },
+        "data": {
+          "type": "ChatOutput",
+          "node": {
+            "display_name": "Audit Report Chat Output",
+            "description": "Displays executive legal risk assessment and revision recommendations."
+          }
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "File-1",
+        "target": "SplitText-1",
+        "sourceHandle": "data",
+        "targetHandle": "data_inputs"
+      },
+      {
+        "source": "SplitText-1",
+        "target": "SupabaseVector-1",
+        "sourceHandle": "chunks",
+        "targetHandle": "ingest_data"
+      },
+      {
+        "source": "GoogleGenerativeAIEmbeddings-1",
+        "target": "SupabaseVector-1",
+        "sourceHandle": "embeddings",
+        "targetHandle": "embedding"
+      },
+      {
+        "source": "ChatInput-1",
+        "target": "SupabaseVector-1",
+        "sourceHandle": "message",
+        "targetHandle": "search_query"
+      },
+      {
+        "source": "SupabaseVector-1",
+        "target": "ParseData-1",
+        "sourceHandle": "search_results",
+        "targetHandle": "data"
+      },
+      {
+        "source": "ParseData-1",
+        "target": "PromptTemplate-1",
+        "sourceHandle": "parsed_text",
+        "targetHandle": "context"
+      },
+      {
+        "source": "ChatInput-1",
+        "target": "PromptTemplate-1",
+        "sourceHandle": "message",
+        "targetHandle": "question"
+      },
+      {
+        "source": "PromptTemplate-1",
+        "target": "LanguageModel-1",
+        "sourceHandle": "prompt",
+        "targetHandle": "input"
+      },
+      {
+        "source": "LanguageModel-1",
+        "target": "ChatOutput-1",
+        "sourceHandle": "text",
+        "targetHandle": "text"
+      }
+    ]
+  }
+}
